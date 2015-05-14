@@ -1,15 +1,18 @@
 <?php
 /**
+ * @package yii2-tagcloud
  * @author Evandro Sviercowski <evandro.swk@gmail.com>
+ * @author Alexander Suter <alexander.suter.ch@gmail.com>
+ * @version  1.0.0
  */
 
-namespace app\components\vendor\YiiTagCloud;
+namespace asu\tagcloud;
 
 use yii\bootstrap\Widget;
 use yii\helpers\Html;
 use app\components\security\Role;
 
-class YiiTagCloud extends Widget
+class TagCloud extends Widget
 {
     /**
      * @var string The YiiTagCloud container css class
