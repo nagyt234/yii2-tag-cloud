@@ -87,7 +87,7 @@ class TagCloud extends Widget {
             $this->options['class'] = $this->containerClass;
         }
         
-        TagCloudAsset::register(\Yii::$app->view);
+        TagCloudAsset::register($this->getView());
         
         $this->getMinAndMaxWeight();
         $this->getFontSizes();
