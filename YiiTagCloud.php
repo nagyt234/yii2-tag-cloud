@@ -1,27 +1,15 @@
 <?php
 /**
  * @author Evandro Sviercowski <evandro.swk@gmail.com>
- * 
- * $this->widget('application.extensions.YiiTagCloud.YiiTagCloud', 
- *          array(
- *              'beginColor' => '00089A',
- *              'endColor' => 'A3AEFF',
- *              'minFontSize' => 8,
- *              'maxFontSize' => 20,
- *              'htmlOptions' => array('style'=>'width: 400px; margin-left: auto; margin-right: auto'),
- *              'arrTags' => array (
- *                      "MVC"       => array('weight'=> 2),
- *                      "PHP"       => array('weight'=> 9, 'url' => 'http://php.net'),
- *                      "MySQL"     => array('weight'=> 8, 'url' => 'http://mysql.com'),
- *                      "jQuery"    => array('weight'=> 6, 'url' => 'http://jquery.com'),
- *                      "SQL"       => array('weight'=> 9),
- *                      "C#"        => array('weight'=> 2),
- *              ),
- *          )
- * );
- * 
  */
-class YiiTagCloud extends CWidget
+
+namespace app\components\vendor\YiiTagCloud;
+
+use yii\bootstrap\Widget;
+use yii\helpers\Html;
+use app\components\security\Role;
+
+class YiiTagCloud extends Widget
 {
     /**
      * @var string The YiiTagCloud container css class
@@ -32,9 +20,9 @@ class YiiTagCloud extends CWidget
      */
     public $containerTag = 'div';
     /**
-     * @var array HtmlOptions of the YiiTagCloud container
+     * @var array options of the YiiTagCloud container
      */
-    public $htmlOptions = array();
+    public $options = array();
     /**
      * @var array with the tags
      */
@@ -53,19 +41,19 @@ class YiiTagCloud extends CWidget
     public $minWeight = 1;
     /**
      * @var integer The largest count (or occurrence).
-     */ 
+     */
     public $maxWeight = 1;
     /**
      * @var array the font-size colors
      */
-    public $arrFontColor = array();    
+    public $arrFontColor = array();
     /**
      * @var integer The smallest font-size.
-     */ 
+     */
     public $minFontSize = 8;
     /**
      * @var integer The largest font-size.
-     */ 
+     */
     public $maxFontSize = 36;
     /**
      * @var string the URL of the CSS file
@@ -74,58 +62,64 @@ class YiiTagCloud extends CWidget
 
     public function init()
     {
-        $this->htmlOptions['id']=$this->getId();
+        $this->options['id']=$this->getId();
 
-        if(!isset($this->htmlOptions['class']))
-            $this->htmlOptions['class'] = $this->containerClass;
+        if(!isset($this->options['class']))
+            $this->options['class'] = $this->containerClass;
 
-        $baseScriptUrl = Yii::app()->getAssetManager()->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'assets' );
+        $baseScriptUrl = \Yii::$app->assetManager->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'assets' );
 
         if($this->cssFile !== false) {
-            if($this->cssFile === null)
-                $this->cssFile = $baseScriptUrl . '/YiiTagCloud.css';
-            Yii::app()->getClientScript()->registerCssFile($this->cssFile);
+            if ($this->cssFile === null) {
+                $this->cssFile = $baseScriptUrl[1] . '/YiiTagCloud.css';
+            }
+            \Yii::$app->view->registerCssFile($this->cssFile);
+            //Yii::app()->getClientScript()->registerCssFile($this->cssFile);
         }
 
         $this->getMinAndMaxWeight();
-        $this->getFontSizes();  
-        $this->genereteColors();   
+        $this->getFontSizes();
+        $this->genereteColors();
 
 
     }
 
     public function run() {
 
-        $this->renderTagCloud();
-        
+        return $this->renderTagCloud();
+
     }
 
     public function renderTagCloud() {
-        echo CHtml::openTag($this->containerTag, $this->htmlOptions);
+        echo Html::beginTag($this->containerTag, $this->options);
         foreach ($this->arrTags as $tag => $conf) {
             $url = isset($conf['url']) ? $conf['url'] : 'javascript:return false';
-            $htmlOptions = isset($conf['htmlOptions']) ? $conf['htmlOptions'] : array();
+            $options = isset($conf['options']) ? $conf['options'] : array();
 
-            if (!isset($htmlOptions['style']) || empty($htmlOptions['style'])) {
-                $htmlOptions['style'] = 'font-size: ' .$conf['font-size'] . 'pt;' . 'color: ' . $this->arrFontColor[$conf['font-size']];
+            if (!isset($options['style']) || empty($options['style'])) {
+                $options['style'] = 'font-size: ' .$conf['font-size'] . 'pt;' . 'color: ' . $this->arrFontColor[$conf['font-size']];
             }
 
-            if (!isset($htmlOptions['target']) || empty($htmlOptions['target'])) {
-                $htmlOptions['target'] = '_blank';
+            if (!isset($options['target']) || empty($options['target'])) {
+                $options['target'] = '_blank';
             }
-            
-            @$htmlOptions['class'] .= ' YiiTagCloudWord';
 
-            
-            echo ' &nbsp;' . CHtml::link($tag, $url, $htmlOptions) . '&nbsp; ';
-            
+            @$options['class'] .= ' YiiTagCloudWord';
+
+
+            // echo ' &nbsp;' . Html::link($tag, $url, $options) . '&nbsp; ';
+            $adminSpecial = '';
+            if (Role::isInRoleSiteAdmin()) {
+            	$adminSpecial = ' (' . $conf['weight'] . ')';// . '['.$conf['font-size'].']';
+            }
+            echo ' &nbsp;' . Html::beginTag('span', $options) . $tag . $adminSpecial . Html::endTag('span') . '&nbsp; ';
         }
-        echo CHtml::closeTag($this->containerTag);
+        echo Html::endTag($this->containerTag);
     }
 
     public function getMinAndMaxWeight() {
 
-        foreach ($this->arrTags as $conf) {        
+        foreach ($this->arrTags as $conf) {
             if ($this->minWeight > $conf['weight'])
                 $this->minWeight = $conf['weight'];
 
@@ -133,20 +127,45 @@ class YiiTagCloud extends CWidget
                 $this->maxWeight = $conf['weight'];
         }
     }
-    
+
     public function getFontSizes() {
-        foreach ($this->arrTags as &$conf) {           
-            $conf['font-size'] = $this->calcFontSize($conf['weight']);
-            $this->arrFontColor[$conf['font-size']] = ''; 
+        $countTags = count($this->arrTags);
+
+        $count1 = round(($countTags / 100 * 12));
+        $count2 = $count1 + round(($countTags / 100 * 13));
+        $count3 = $count2 + round(($countTags / 100 * 25));
+        $count4 = $countTags;
+
+        $i = 1;
+    	foreach ($this->arrTags as &$conf) {
+
+    		if ($i <= $count1) {
+    			$conf['font-size'] = 15;
+    		} else if ($i <= $count2) {
+    			$conf['font-size'] = 13;
+    		} else if ($i <= $count3) {
+    			$conf['font-size'] = 11;
+    		} else {
+    			$conf['font-size'] = 9;
+    		}
+
+        	// $conf['font-size'] = $this->calcFontSize($conf['weight']);
+
+            $this->arrFontColor[$conf['font-size']] = '';
+
+            $i++;
         }
     }
 
     public function calcFontSize($weight) {
-        //Just a precaution, it shouldn't happen if all weights are > 0
-        if ($this->maxWeight - $this->minWeight == 0)
-            return round(($weight - $this->minWeight) + $this->minFontSize);
+    	$difference = $this->maxWeight - $this->minWeight;
+    	// Fix by alex start
+    	if ($this->maxWeight == $this->minWeight) {
+    		$difference = 1;
+    	}
+    	// Fix by alex end
 
-    return round(((($weight - $this->minWeight) * ($this->maxFontSize - $this->minFontSize)) / ($this->maxWeight - $this->minWeight)) + $this->minFontSize);
+		return round(((($weight - $this->minWeight) * ($this->maxFontSize - $this->minFontSize)) / ($difference)) + $this->minFontSize);
     }
 
     public function genereteColors () {
@@ -162,8 +181,8 @@ class YiiTagCloud extends CWidget
         $G1 = ($endColor & 0x00ff00) >> 8;
         $B1 = ($endColor & 0x0000ff) >> 0;
 
-        $numColors = count($this->arrFontColor);
-        
+        $numColors = $theNumSteps = count($this->arrFontColor);
+
         $i =0;
         foreach ($this->arrFontColor as &$value) {
             $R = $this->interpolate($R0, $R1, $i, $numColors);
@@ -178,7 +197,7 @@ class YiiTagCloud extends CWidget
     }
 
     public function interpolate($pBegin, $pEnd, $pStep, $pMax) {
-        if ($pBegin < $pEnd) 
+        if ($pBegin < $pEnd)
             return (($pEnd - $pBegin) * ($pStep / $pMax)) + $pBegin;
 
         return (($pBegin - $pEnd) * (1 - ($pStep / $pMax))) + $pEnd;
