@@ -9,7 +9,7 @@
         {
             "name": "Antonio Ramirez",
             "email": "amigo.cobos@gmail.com"
-        }
+        },
 		{
 			"name": "Alexander Suter",
 			"email": "alexander.suter.ch@gmail.com"
@@ -17,10 +17,9 @@
     ],
 
     "require": {
-        "yiisoft/yii2": ">=2.0.0"
+        "yiisoft/yii2": "2.0.*"
     },
 
-    // class autoloading specs
     "autoload": {
         "psr-4": {
             "asu\\tagcloud\\": ""
