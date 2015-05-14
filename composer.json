@@ -1,0 +1,34 @@
+{
+    "name": "alexander-suter/yii2-tagcloud",
+
+    "type": "yii2-extension",
+
+    "description": "Tagcloud for Yii2",
+    "keywords": ["yii2", "tagcloud"],
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yiisoft/yii2/issues?labels=ext%3Aimagine",
+        "source": "https://github.com/yiisoft/yii2"
+    },
+    "authors": [
+        {
+            "name": "Antonio Ramirez",
+            "email": "amigo.cobos@gmail.com"
+        }
+		{
+			"name": "Alexander Suter",
+			"email": "alexander.suter.ch@gmail.com"
+		}
+    ],
+
+    "require": {
+        "yiisoft/yii2": "2.0.4"
+    },
+
+    // class autoloading specs
+    "autoload": {
+        "psr-4": {
+            "asu\\tagcloud\\": ""
+        }
+    }
+}
