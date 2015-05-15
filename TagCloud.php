@@ -4,9 +4,15 @@ namespace asu\tagcloud;
 
 use yii\bootstrap\Widget;
 use yii\helpers\Html;
-use app\components\security\Role;
 
 class TagCloud extends Widget {
+
+    /**
+     * If true, the weight of the word will be shown, otherwise not.
+     *
+     * @var boolean Display Weight.
+     */
+    public $displayWeight = false;
 
     /**
      *
@@ -24,13 +30,13 @@ class TagCloud extends Widget {
      *
      * @var array options of the YiiTagCloud container
      */
-    public $options = array();
+    public $options = [];
 
     /**
      *
      * @var array with the tags
      */
-    public $arrTags = array();
+    public $arrTags = [];
 
     /**
      *
@@ -60,7 +66,7 @@ class TagCloud extends Widget {
      *
      * @var array the font-size colors
      */
-    public $arrFontColor = array();
+    public $arrFontColor = [];
 
     /**
      *
@@ -116,7 +122,7 @@ class TagCloud extends Widget {
             
             // echo ' &nbsp;' . Html::link($tag, $url, $options) . '&nbsp; ';
             $adminSpecial = '';
-            if (Role::isInRoleSiteAdmin()) {
+            if ($this->displayWeight) {
                 $adminSpecial = ' (' . $conf['weight'] . ')'; // . '['.$conf['font-size'].']';
             }
             echo ' &nbsp;' . Html::beginTag('span', $options) . $tag . $adminSpecial . Html::endTag('span') . '&nbsp; ';
