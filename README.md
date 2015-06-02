@@ -4,7 +4,7 @@ yii2-tag-cloud
 [![Latest Stable Version](https://poser.pugx.org/alexander-suter/yii2-tag-cloud/v/stable)](https://packagist.org/packages/alexander-suter/yii2-tag-cloud)
 [![Total Downloads](https://poser.pugx.org/alexander-suter/yii2-tag-cloud/downloads)](https://packagist.org/packages/alexander-suter/yii2-tag-cloud)
 
-A simple tag cloud for Yii2.
+Yii2 extension. Tag Cloud.
 
 ## Installation
 
