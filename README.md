@@ -28,19 +28,19 @@ to the ```require``` section of your `composer.json` file.
 
 ~~~
 echo TagCloud::widget([
-		'beginColor' => '00089A',
-		'endColor' => 'A3AEFF',
-		'minFontSize' => 8,
-		'maxFontSize' => 15,
+        'beginColor' => '00089A',
+        'endColor' => 'A3AEFF',
+        'minFontSize' => 8,
+        'maxFontSize' => 15,
         'displayWeight' => false,
-		'arrTags' => array (
-                        "MVC"     => array('weight'=> 2),
-                        "PHP"     => array('weight'=> 9, 'url' => 'http://php.net'),
-                        "MySQL"   => array('weight'=> 8, 'url' => 'http://mysql.com'),
-                        "jQuery"  => array('weight'=> 6, 'url' => 'http://jquery.com'),
-                        "SQL"     => array('weight'=> 9),
-                        "C#"    => array('weight'=> 2),
-                ),
-		'options' => ['style' => 'word-wrap: break-word;']
+        'arrTags' => [
+                        "MVC"     => ['weight'=> 2],
+                        "PHP"     => ['weight'=> 9, 'url' => 'http://php.net'],
+                        "MySQL"   => ['weight'=> 8, 'url' => 'http://mysql.com'],
+                        "jQuery"  => ['weight'=> 6, 'url' => 'http://jquery.com'],
+                        "SQL"     => ['weight'=> 9],
+                        "C#"    => ['weight'=> 2)],
+                ],
+        'options' => ['style' => 'word-wrap: break-word;']
 ]);
 ~~~

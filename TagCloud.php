@@ -18,7 +18,7 @@ class TagCloud extends Widget {
      *
      * @var string The YiiTagCloud container css class
      */
-    public $containerClass = 'YiiTagCloud';
+    public $containerClass = 'tag-cloud';
 
     /**
      *
@@ -36,7 +36,7 @@ class TagCloud extends Widget {
      *
      * @var array with the tags
      */
-    public $arrTags = [];
+    public $tags = [];
 
     /**
      *
@@ -66,7 +66,7 @@ class TagCloud extends Widget {
      *
      * @var array the font-size colors
      */
-    public $arrFontColor = [];
+    public $fontColors = [];
 
     /**
      *
@@ -86,6 +86,9 @@ class TagCloud extends Widget {
      */
     public $cssFile;
 
+    /**
+     * @inheritdoc
+     */
     public function init() {
         $this->options['id'] = $this->getId();
         
@@ -95,43 +98,45 @@ class TagCloud extends Widget {
         
         TagCloudAsset::register($this->getView());
         
-        $this->getMinAndMaxWeight();
-        $this->getFontSizes();
-        $this->genereteColors();
+        $this->setMinAndMaxWeight();
+        $this->setFontSizes();
+        $this->generateColors();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function run() {
         return $this->renderTagCloud();
     }
 
     public function renderTagCloud() {
         echo Html::beginTag($this->containerTag, $this->options);
-        foreach ($this->arrTags as $tag => $conf) {
+        foreach ($this->tags as $tag => $conf) {
             $url = isset($conf['url']) ? $conf['url'] : 'javascript:return false';
-            $options = isset($conf['options']) ? $conf['options'] : array();
-            
+            $options = isset($conf['options']) ? $conf['options'] : [];
+
             if (!isset($options['style']) || empty($options['style'])) {
-                $options['style'] = 'font-size: ' . $conf['font-size'] . 'pt;' . 'color: ' . $this->arrFontColor[$conf['font-size']];
+                $options['style'] = 'font-size: ' . $conf['font-size'] . 'pt;' . 'color: ' . $this->fontColors[$conf['font-size']];
             }
             
             if (!isset($options['target']) || empty($options['target'])) {
                 $options['target'] = '_blank';
             }
-            
-            @$options['class'] .= ' YiiTagCloudWord';
-            
-            // echo ' &nbsp;' . Html::link($tag, $url, $options) . '&nbsp; ';
-            $adminSpecial = '';
-            if ($this->displayWeight) {
-                $adminSpecial = ' (' . $conf['weight'] . ')'; // . '['.$conf['font-size'].']';
+
+            if (!isset($options['class']) || empty($options['class'])) {
+                $options['class'] = 'tag-cloud-word';
             }
-            echo ' &nbsp;' . Html::beginTag('span', $options) . $tag . $adminSpecial . Html::endTag('span') . '&nbsp; ';
+
+            ($this->displayWeight) ? $weight = ' (' . $conf['weight'] . ')' : $weight = '';
+
+            echo ' &nbsp;' . Html::a($tag . $weight, $url, $options) . '&nbsp; ';
         }
         echo Html::endTag($this->containerTag);
     }
 
-    public function getMinAndMaxWeight() {
-        foreach ($this->arrTags as $conf) {
+    public function setMinAndMaxWeight() {
+        foreach ($this->tags as $conf) {
             if ($this->minWeight > $conf['weight'])
                 $this->minWeight = $conf['weight'];
             
@@ -140,30 +145,11 @@ class TagCloud extends Widget {
         }
     }
 
-    public function getFontSizes() {
-        $countTags = count($this->arrTags);
-        
-        $count1 = round(($countTags / 100 * 12));
-        $count2 = $count1 + round(($countTags / 100 * 13));
-        $count3 = $count2 + round(($countTags / 100 * 25));
-        $count4 = $countTags;
-        
+    public function setFontSizes() {
         $i = 1;
-        foreach ($this->arrTags as &$conf) {
-            
-            if ($i <= $count1) {
-                $conf['font-size'] = 15;
-            } else if ($i <= $count2) {
-                $conf['font-size'] = 13;
-            } else if ($i <= $count3) {
-                $conf['font-size'] = 11;
-            } else {
-                $conf['font-size'] = 9;
-            }
-            
-            // $conf['font-size'] = $this->calcFontSize($conf['weight']);
-            
-            $this->arrFontColor[$conf['font-size']] = '';
+        foreach ($this->tags as &$conf) {
+            $conf['font-size'] = $this->calcFontSize($conf['weight']);
+            $this->fontColors[$conf['font-size']] = '';
             
             $i++;
         }
@@ -180,8 +166,8 @@ class TagCloud extends Widget {
         return round(((($weight - $this->minWeight) * ($this->maxFontSize - $this->minFontSize)) / ($difference)) + $this->minFontSize);
     }
 
-    public function genereteColors() {
-        krsort($this->arrFontColor);
+    public function generateColors() {
+        krsort($this->fontColors);
         $beginColor = hexdec($this->beginColor);
         $endColor = hexdec($this->endColor);
         
@@ -193,10 +179,10 @@ class TagCloud extends Widget {
         $G1 = ($endColor & 0x00ff00) >> 8;
         $B1 = ($endColor & 0x0000ff) >> 0;
         
-        $numColors = $theNumSteps = count($this->arrFontColor);
+        $numColors = $theNumSteps = count($this->fontColors);
         
         $i = 0;
-        foreach ($this->arrFontColor as &$value) {
+        foreach ($this->fontColors as &$value) {
             $R = $this->interpolate($R0, $R1, $i, $numColors);
             $G = $this->interpolate($G0, $G1, $i, $numColors);
             $B = $this->interpolate($B0, $B1, $i, $numColors);
