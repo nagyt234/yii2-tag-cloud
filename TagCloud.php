@@ -112,7 +112,7 @@ class TagCloud extends Widget
         return $this->renderTagCloud();
     }
 
-    public function renderTagCloud()
+    private function renderTagCloud()
     {
         echo Html::beginTag($this->containerTag, $this->options);
         foreach ($this->tags as $tag => $conf) {
@@ -138,7 +138,7 @@ class TagCloud extends Widget
         echo Html::endTag($this->containerTag);
     }
 
-    public function setMinAndMaxWeight()
+    private function setMinAndMaxWeight()
     {
         foreach ($this->tags as $conf) {
             if ($this->minWeight > $conf['weight'])
@@ -149,7 +149,7 @@ class TagCloud extends Widget
         }
     }
 
-    public function setFontSizes()
+    private function setFontSizes()
     {
         $i = 1;
         foreach ($this->tags as &$conf) {
@@ -160,19 +160,16 @@ class TagCloud extends Widget
         }
     }
 
-    public function calcFontSize($weight)
+    private function calcFontSize($weight)
     {
         $difference = $this->maxWeight - $this->minWeight;
-        // Fix by alex start
         if ($this->maxWeight == $this->minWeight) {
             $difference = 1;
         }
-        // Fix by alex end
-        
         return round(((($weight - $this->minWeight) * ($this->maxFontSize - $this->minFontSize)) / ($difference)) + $this->minFontSize);
     }
 
-    public function generateColors()
+    private function generateColors()
     {
         krsort($this->fontColors);
         $beginColor = hexdec($this->beginColor);
@@ -200,11 +197,11 @@ class TagCloud extends Widget
         }
     }
 
-    public function interpolate($pBegin, $pEnd, $pStep, $pMax)
+    private function interpolate($pBegin, $pEnd, $pStep, $pMax)
     {
-        if ($pBegin < $pEnd)
+        if ($pBegin < $pEnd) {
             return (($pEnd - $pBegin) * ($pStep / $pMax)) + $pBegin;
-        
+        }
         return (($pBegin - $pEnd) * (1 - ($pStep / $pMax))) + $pEnd;
     }
 }
