@@ -1,11 +1,11 @@
 <?php
-
 namespace asu\tagcloud;
 
 use yii\bootstrap\Widget;
 use yii\helpers\Html;
 
-class TagCloud extends Widget {
+class TagCloud extends Widget
+{
 
     /**
      * If true, the weight of the word will be shown, otherwise not.
@@ -89,10 +89,11 @@ class TagCloud extends Widget {
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         $this->options['id'] = $this->getId();
         
-        if (!isset($this->options['class'])) {
+        if (! isset($this->options['class'])) {
             $this->options['class'] = $this->containerClass;
         }
         
@@ -106,36 +107,39 @@ class TagCloud extends Widget {
     /**
      * @inheritdoc
      */
-    public function run() {
+    public function run()
+    {
         return $this->renderTagCloud();
     }
 
-    public function renderTagCloud() {
+    public function renderTagCloud()
+    {
         echo Html::beginTag($this->containerTag, $this->options);
         foreach ($this->tags as $tag => $conf) {
             $url = isset($conf['url']) ? $conf['url'] : 'javascript:return false';
             $options = isset($conf['options']) ? $conf['options'] : [];
-
-            if (!isset($options['style']) || empty($options['style'])) {
+            
+            if (! isset($options['style']) || empty($options['style'])) {
                 $options['style'] = 'font-size: ' . $conf['font-size'] . 'pt;' . 'color: ' . $this->fontColors[$conf['font-size']];
             }
             
-            if (!isset($options['target']) || empty($options['target'])) {
+            if (! isset($options['target']) || empty($options['target'])) {
                 $options['target'] = '_blank';
             }
-
-            if (!isset($options['class']) || empty($options['class'])) {
+            
+            if (! isset($options['class']) || empty($options['class'])) {
                 $options['class'] = 'tag-cloud-word';
             }
-
+            
             ($this->displayWeight) ? $weight = ' (' . $conf['weight'] . ')' : $weight = '';
-
+            
             echo ' &nbsp;' . Html::a($tag . $weight, $url, $options) . '&nbsp; ';
         }
         echo Html::endTag($this->containerTag);
     }
 
-    public function setMinAndMaxWeight() {
+    public function setMinAndMaxWeight()
+    {
         foreach ($this->tags as $conf) {
             if ($this->minWeight > $conf['weight'])
                 $this->minWeight = $conf['weight'];
@@ -145,17 +149,19 @@ class TagCloud extends Widget {
         }
     }
 
-    public function setFontSizes() {
+    public function setFontSizes()
+    {
         $i = 1;
         foreach ($this->tags as &$conf) {
             $conf['font-size'] = $this->calcFontSize($conf['weight']);
             $this->fontColors[$conf['font-size']] = '';
             
-            $i++;
+            $i ++;
         }
     }
 
-    public function calcFontSize($weight) {
+    public function calcFontSize($weight)
+    {
         $difference = $this->maxWeight - $this->minWeight;
         // Fix by alex start
         if ($this->maxWeight == $this->minWeight) {
@@ -166,7 +172,8 @@ class TagCloud extends Widget {
         return round(((($weight - $this->minWeight) * ($this->maxFontSize - $this->minFontSize)) / ($difference)) + $this->minFontSize);
     }
 
-    public function generateColors() {
+    public function generateColors()
+    {
         krsort($this->fontColors);
         $beginColor = hexdec($this->beginColor);
         $endColor = hexdec($this->endColor);
@@ -189,15 +196,15 @@ class TagCloud extends Widget {
             
             $value = sprintf("#%06X", (((($R << 8) | $G) << 8) | $B));
             
-            $i++;
+            $i ++;
         }
     }
 
-    public function interpolate($pBegin, $pEnd, $pStep, $pMax) {
+    public function interpolate($pBegin, $pEnd, $pStep, $pMax)
+    {
         if ($pBegin < $pEnd)
             return (($pEnd - $pBegin) * ($pStep / $pMax)) + $pBegin;
         
         return (($pBegin - $pEnd) * (1 - ($pStep / $pMax))) + $pEnd;
     }
-
 }
