@@ -1,42 +1,38 @@
 <?php
 namespace asu\tagcloud;
 
-use yii\bootstrap\Widget;
+use yii\base\Widget;
 use yii\helpers\Html;
 
 class TagCloud extends Widget
 {
 
     /**
-     * If true, the weight of the word will be shown, otherwise not.
+     * Tags to display.
+     * Every tag holds an name and a weight. Optional an url.
      *
-     * @var boolean Display Weight.
+     * [
+     * "MVC" => ['weight' => 2],
+     * "PHP" => ['weight' => 9, 'url' => 'http://php.net'],
+     * "MySQL" => ['weight' => 8, 'url' => 'http://mysql.com'],
+     * "jQuery" => ['weight' => 6]
+     * ]
+     *
+     * @var array Tags.
      */
-    public $displayWeight = false;
+    public $tags = [];
 
     /**
      *
-     * @var string The YiiTagCloud container css class
-     */
-    public $containerClass = 'tag-cloud';
-
-    /**
-     *
-     * @var string The YiiTagCloud container html tag
+     * @var string Container tag.
      */
     public $containerTag = 'div';
 
     /**
      *
-     * @var array options of the YiiTagCloud container
+     * @var array Options of the container tag.
      */
     public $options = [];
-
-    /**
-     *
-     * @var array with the tags
-     */
-    public $tags = [];
 
     /**
      *
@@ -51,22 +47,11 @@ class TagCloud extends Widget
     public $endColor = 'A3AEFF';
 
     /**
+     * If true, the weight of the word will be shown, otherwise not.
      *
-     * @var integer The smallest count (or occurrence).
+     * @var boolean Display Weight.
      */
-    public $minWeight = 1;
-
-    /**
-     *
-     * @var integer The largest count (or occurrence).
-     */
-    public $maxWeight = 1;
-
-    /**
-     *
-     * @var array the font-size colors
-     */
-    public $fontColors = [];
+    public $displayWeight = false;
 
     /**
      *
@@ -82,9 +67,27 @@ class TagCloud extends Widget
 
     /**
      *
-     * @var string the URL of the CSS file
+     * @var integer The smallest count.
      */
-    public $cssFile;
+    private $minWeight = 1;
+
+    /**
+     *
+     * @var integer The largest count.
+     */
+    private $maxWeight = 1;
+
+    /**
+     *
+     * @var string Default css container class.
+     */
+    private $containerClass = 'tag-cloud';
+
+    /**
+     *
+     * @var array the font-size colors
+     */
+    private $fontColors = [];
 
     /**
      * @inheritdoc
@@ -99,8 +102,8 @@ class TagCloud extends Widget
         
         TagCloudAsset::register($this->getView());
         
-        $this->setMinAndMaxWeight();
-        $this->setFontSizes();
+        $this->calculateMinMaxWeight();
+        $this->calculateFontSizes();
         $this->generateColors();
     }
 
@@ -108,11 +111,6 @@ class TagCloud extends Widget
      * @inheritdoc
      */
     public function run()
-    {
-        return $this->renderTagCloud();
-    }
-
-    private function renderTagCloud()
     {
         echo Html::beginTag($this->containerTag, $this->options);
         foreach ($this->tags as $tag => $conf) {
@@ -138,29 +136,15 @@ class TagCloud extends Widget
         echo Html::endTag($this->containerTag);
     }
 
-    private function setMinAndMaxWeight()
+    private function calculateFontSizes()
     {
-        foreach ($this->tags as $conf) {
-            if ($this->minWeight > $conf['weight'])
-                $this->minWeight = $conf['weight'];
-            
-            if ($this->maxWeight < $conf['weight'])
-                $this->maxWeight = $conf['weight'];
-        }
-    }
-
-    private function setFontSizes()
-    {
-        $i = 1;
         foreach ($this->tags as &$conf) {
-            $conf['font-size'] = $this->calcFontSize($conf['weight']);
+            $conf['font-size'] = $this->calculateFontSizeByWeight($conf['weight']);
             $this->fontColors[$conf['font-size']] = '';
-            
-            $i ++;
         }
     }
 
-    private function calcFontSize($weight)
+    private function calculateFontSizeByWeight($weight)
     {
         $difference = $this->maxWeight - $this->minWeight;
         if ($this->maxWeight == $this->minWeight) {
@@ -190,18 +174,28 @@ class TagCloud extends Widget
             $R = $this->interpolate($R0, $R1, $i, $numColors);
             $G = $this->interpolate($G0, $G1, $i, $numColors);
             $B = $this->interpolate($B0, $B1, $i, $numColors);
-            
             $value = sprintf("#%06X", (((($R << 8) | $G) << 8) | $B));
-            
             $i ++;
         }
     }
 
-    private function interpolate($pBegin, $pEnd, $pStep, $pMax)
+    private function calculateMinMaxWeight()
     {
-        if ($pBegin < $pEnd) {
-            return (($pEnd - $pBegin) * ($pStep / $pMax)) + $pBegin;
+        foreach ($this->tags as $conf) {
+            if ($this->minWeight > $conf['weight']) {
+                $this->minWeight = $conf['weight'];
+            }
+            if ($this->maxWeight < $conf['weight']) {
+                $this->maxWeight = $conf['weight'];
+            }
         }
-        return (($pBegin - $pEnd) * (1 - ($pStep / $pMax))) + $pEnd;
+    }
+
+    private function interpolate($begin, $end, $step, $max)
+    {
+        if ($begin < $end) {
+            return (($end - $begin) * ($step / $max)) + $begin;
+        }
+        return (($begin - $end) * (1 - ($step / $max))) + $end;
     }
 }
