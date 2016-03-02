@@ -10,7 +10,9 @@ class TagCloud extends Widget
     /**
      * Tags to display.
      * Every tag holds an name and a weight. Optional an url.
-     *
+     * 
+     * If there is no url definied, tag will be rendered as span otherwise as a.
+     * 
      * [
      * "MVC" => ['weight' => 2],
      * "PHP" => ['weight' => 9, 'url' => 'http://php.net'],
@@ -64,7 +66,7 @@ class TagCloud extends Widget
      * @var integer The largest font-size.
      */
     public $maxFontSize = 36;
-
+    
     /**
      *
      * @var integer The smallest count.
@@ -114,7 +116,8 @@ class TagCloud extends Widget
     {
         echo Html::beginTag($this->containerTag, $this->options);
         foreach ($this->tags as $tag => $conf) {
-            $url = isset($conf['url']) ? $conf['url'] : 'javascript:return false';
+            $url = isset($conf['url']) ? $conf['url'] : null;
+            
             $options = isset($conf['options']) ? $conf['options'] : [];
             
             if (! isset($options['style']) || empty($options['style'])) {
@@ -131,7 +134,13 @@ class TagCloud extends Widget
             
             ($this->displayWeight) ? $weight = ' (' . $conf['weight'] . ')' : $weight = '';
             
-            echo ' &nbsp;' . Html::a($tag . $weight, $url, $options) . '&nbsp; ';
+            echo ' &nbsp;';
+            if ($url == null) {
+                echo Html::tag('span', $tag . $weight, $options);
+            } else {
+                echo Html::a($tag . $weight, $url, $options);
+            }
+            echo '&nbsp; ';
         }
         echo Html::endTag($this->containerTag);
     }
